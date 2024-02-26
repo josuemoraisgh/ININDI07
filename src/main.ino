@@ -1,3 +1,6 @@
+#include <arduino.h>
+#include <math.h>
+#include <inindThread.h>
 ///////////////////////Funções do Filtro/////////////////////////////////////
 typedef struct
 {
@@ -36,9 +39,6 @@ double DigitalFilter_get(DigitalFilter *f)
   return acc;
 }
 //////////////////////////////Funções das Trheads///////////////////////////////////
-#include <math.h>
-#include <inindThread.h>
-
 #define pinANALOG A5 // Configura o pino de leitura
 
 #define FILTER_ORDER1 50
