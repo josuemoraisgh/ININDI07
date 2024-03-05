@@ -41,7 +41,7 @@ def findFilterDigitalFir(fDesejada,ordem,fs,filterType="lowpass",desvio=0.05,isB
   return taps
 
 # Definindo os parâmetros do filtro
-taps = findFilterDigitalFir(10,50,1000,isBP=True)
-[print(str(h)+',') for h in taps]
+taps = findFilterDigitalFir(10,50,100,isBP=False)
+#[print(str(h)+',') for h in taps]
 #taps = findFilterDigitalFir(12,51,100,'highpass',isBP=False)
-#print([h for h in taps])s
+#[print(str(h)+',') for h in taps]
