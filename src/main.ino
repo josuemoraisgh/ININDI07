@@ -1,47 +1,13 @@
 #include <arduino.h>
-#include <math.h>
 #include <inindThread.h>
-///////////////////////Funções do Filtro/////////////////////////////////////
-typedef struct
-{
-  double *history;
-  const double *taps;
-  unsigned int last_index;
-  unsigned int filterOrder;
-} DigitalFilter;
-
-void DigitalFilter_init(DigitalFilter *f, const int filterOrder, const double *const filterTaps)
-{
-  f->history = (double *)malloc(filterOrder * sizeof(double));
-  for (int i = 0; i < filterOrder; ++i)
-    f->history[i] = 0;
-  f->taps = filterTaps;
-  f->filterOrder = filterOrder;
-  f->last_index = 0;
-}
-
-void DigitalFilter_put(DigitalFilter *f, const double input)
-{
-  f->history[f->last_index++] = input;
-  if (f->last_index == f->filterOrder)
-    f->last_index = 0;
-}
-
-double DigitalFilter_get(DigitalFilter *f)
-{
-  double acc = 0;
-  int index = f->last_index, i;
-  for (i = 0; i < f->filterOrder; ++i)
-  {
-    index = index != 0 ? index - 1 : f->filterOrder - 1;
-    acc += f->history[index] * f->taps[i];
-  };
-  return acc;
-}
+#include <digitalFilter.h>
 //////////////////////////////Funções das Trheads///////////////////////////////////
 #define pinANALOG A5 // Configura o pino de leitura
-
+#define ANALOG_INTERVAL 1 // analog read interval (milliseconds)
 #define FILTER_ORDER1 50
+
+unsigned long count = 0;
+
 DigitalFilter filter1;
 const double filter_taps1[FILTER_ORDER1] = {
     4.516054525870999e-05,
@@ -93,15 +59,20 @@ const double filter_taps1[FILTER_ORDER1] = {
     0.0006701264020523413,
     0.0012953896783814691,
     0.0009142054619561833,
-    4.516054525870999e-05};
+    4.516054525870999e-05
+};
 
-void analogReadFunc()
-{ // Faz a leitura do sinal Analogico
+void analogReadFunc() // Faz a leitura do sinal Analogico
+{
   const int analog_Value = analogRead(pinANALOG) - 512;
   DigitalFilter_put(&filter1, analog_Value);
 
-  Serial.println(DigitalFilter_get(&filter1));
-  // Serial.println(analog_Value);
+  count += ANALOG_INTERVAL;
+  Serial.print(">amp:");
+  Serial.print(count);  
+  Serial.print(":");  
+  Serial.print(DigitalFilter_get(&filter1));
+  Serial.println("§Volts|g");
 }
 
 void setup()
@@ -109,7 +80,7 @@ void setup()
   Serial.begin(19200);
   pinMode(pinANALOG, INPUT);
   DigitalFilter_init(&filter1, FILTER_ORDER1, filter_taps1);
-  threadSetup(analogReadFunc, 10, NULL); // parametros:funcão,intervalo,funcão,intervalo,...,NULL
+  threadSetup(analogReadFunc, ANALOG_INTERVAL, NULL); // parametros:funcão,intervalo,funcão,intervalo,...,NULL
 }
 
 void loop()
