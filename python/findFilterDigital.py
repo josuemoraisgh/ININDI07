@@ -13,16 +13,16 @@ import numpy as np
 def findFilterDigitalFir(fDesejada,ordem,fs,filterType="lowpass",desvio=0.05,isBP=True):
   faux      = fDesejada*(2*np.pi)/fs
   condition = (isBP if filterType=="lowpass" else not isBP)
-  for fc in np.linspace(fDesejada, fs/2 if condition else 0, 10000, endpoint=False):
-    taps = firwin(ordem, cutoff = fc,fs =fs, window = "hamming", pass_zero = filterType)
-    w, h = freqz(taps, 1, worN=512)# Resposta em frequência do filtro
+  for fc in np.linspace(fDesejada,(10*fDesejada if fs/2 > 10*fDesejada else fs/2) if condition else fDesejada//20, 10000, endpoint=False):
+    taps = firwin(ordem, cutoff = fc,fs = fs, window = "hamming", pass_zero = filterType)
+    w, h = freqz(taps, 1, worN=1024)# Resposta em frequência do filtro
     hAux, wAux = (np.abs(h),np.abs(w)) if condition else (np.abs(h)[::-1], np.abs(w)[::-1])
     index = np.argmax(hAux<=(1-desvio) if isBP else hAux>=desvio)
     if ((wAux[index] >= faux) if condition else (wAux[index] <= faux)): break;
 
-  fDInicio = (wAux*fs/(2*np.pi))[index]
+  fDInicio = wAux[index]*fs/(2*np.pi)
   index = np.argmax(hAux<=desvio if isBP else hAux>=(1-desvio))
-  fDFinal = (wAux*fs/(2*np.pi))[index]
+  fDFinal = wAux[index]*fs/(2*np.pi)
 
   f = w*fs/(2*np.pi) #Transformando a frequência de rad/samples para Hz
   fig, ax1 = subplots(figsize=(20,6))

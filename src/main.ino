@@ -3,7 +3,7 @@
 #include <digitalFilter.h>
 //////////////////////////////Funções das Trheads///////////////////////////////////
 #define pinANALOG A5 // Configura o pino de leitura
-#define ANALOG_INTERVAL 1 // analog read interval (milliseconds)
+#define ANALOG_INTERVAL 10 // analog read interval (milliseconds)
 #define FILTER_ORDER1 50
 
 unsigned long count = 0;
